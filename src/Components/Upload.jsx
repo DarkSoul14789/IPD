@@ -1,0 +1,385 @@
+import React, { useState } from 'react';
+import {
+  Progress,
+  Box,
+  ButtonGroup,
+  Button,
+  Heading,
+  Flex,
+  FormControl,
+  GridItem,
+  FormLabel,
+  Input,
+  SimpleGrid,
+  InputGroup,
+  Textarea,
+  FormHelperText,
+} from '@chakra-ui/react';
+
+import { useToast } from '@chakra-ui/react';
+import storage from '../storage';
+
+
+// const Form1 = params => {
+//   const [show, setShow] = React.useState(false);
+  
+//   const handleClick = () => setShow(!show);
+//   return (
+//     <>
+//       <Heading w="100%" textAlign={'center'} fontWeight="normal">
+//         Create Request
+//       </Heading>
+//       <SimpleGrid columns={1} spacing={6}>
+//         <FormControl as={GridItem} colSpan={[3, 2]}>
+//           <FormLabel
+//             fontSize="sm"
+//             fontWeight="md"
+//             color="gray.700"
+//             _dark={{
+//               color: 'gray.50',
+//             }}
+//           >
+//             Title
+//           </FormLabel>
+//           <InputGroup size="sm">
+//             <Input
+//               type="tel"
+//               placeholder="www.example.com"
+//               focusBorderColor="brand.400"
+//               rounded="md"
+//               value={params.title}
+//               onChange={event => params.setTitle(event.target.value)}
+//             />
+//           </InputGroup>
+//         </FormControl>
+
+//         <FormControl id="email" mt={1}>
+//           <FormLabel
+//             fontSize="sm"
+//             fontWeight="md"
+//             color="gray.700"
+//             _dark={{
+//               color: 'gray.50',
+//             }}
+//           >
+//             Description
+//           </FormLabel>
+//           <Textarea
+//             placeholder="you@example.com"
+//             rows={3}
+//             shadow="sm"
+//             focusBorderColor="brand.400"
+//             fontSize={{
+//               sm: 'sm',
+//             }}
+//             value={params.desc}
+//             onChange={event => params.setDesc(event.target.value)}
+//           />
+//           <FormHelperText>Brief description for your proposal.</FormHelperText>
+//         </FormControl>
+//         <FormControl as={GridItem} colSpan={[3, 2]}>
+//           <FormLabel
+//             fontSize="sm"
+//             fontWeight="md"
+//             color="gray.700"
+//             _dark={{
+//               color: 'gray.50',
+//             }}
+//           >
+//             Target Funding
+//           </FormLabel>
+//           <InputGroup size="sm">
+//             <Input
+//               type="text"
+//               placeholder="10 ETH"
+//               focusBorderColor="brand.400"
+//               rounded="md"
+//               value={params.target}
+//               onChange={event => params.setTarget(event.target.value)}
+//             />
+//           </InputGroup>
+//         </FormControl>
+//       </SimpleGrid>
+//     </>
+//   );
+// };
+
+const Form2 = params => {
+  return (
+    <>
+      <Heading w="100%" textAlign={'center'} fontWeight="normal" mb="2%">
+        Upload Files
+      </Heading>
+      <FormControl as={GridItem} colSpan={6}>
+        <FormLabel
+          htmlFor="TItle"
+          fontSize="sm"
+          fontWeight="md"
+          color="gray.700"
+          _dark={{
+            color: 'gray.50',
+          }}
+          mt="2%"
+        >
+          Title
+        </FormLabel>
+        <Input
+          type="text"
+          name="TItle"
+          id="TItle"
+          autoComplete="street-address"
+          focusBorderColor="brand.400"
+          shadow="sm"
+          size="sm"
+          w="full"
+          rounded="md"
+          value={params.title2}
+          onChange={event => {
+            params.setTitle2(event.target.value);
+          }}
+          // onChange={}
+        />
+      </FormControl>
+
+      <FormControl as={GridItem} colSpan={[6, 6, null, 2]}>
+        <FormLabel
+          htmlFor="benefit1"
+          fontSize="sm"
+          fontWeight="md"
+          color="gray.700"
+          _dark={{
+            color: 'gray.50',
+          }}
+          mt="2%"
+        >
+          Description
+        </FormLabel>
+        <Input
+          type="text"
+          name="benefit1"
+          id="benefit1"
+          autoComplete="benefit1"
+          focusBorderColor="brand.400"
+          shadow="sm"
+          size="sm"
+          w="full"
+          rounded="md"
+          value={params.benefit}
+          onChange={event => {
+            params.setBenefit(event.target.value);
+          }}
+        />
+      </FormControl>
+
+      <FormControl as={GridItem} colSpan={[6, 3, null, 2]}>
+        <FormLabel
+          htmlFor="benefit2"
+          fontSize="sm"
+          fontWeight="md"
+          color="gray.700"
+          _dark={{
+            color: 'gray.50',
+          }}
+          mt="2%"
+        >
+          To Pay
+        </FormLabel>
+        <Input
+          type="number"
+          name="benefit2"
+          id="benefit2"
+          autoComplete="benefit2"
+          focusBorderColor="brand.400"
+          shadow="sm"
+          size="sm"
+          w="full"
+          rounded="md"
+          value={params.benefit2}
+          onChange={event => {
+            params.setBenefit2(event.target.value);
+          }}
+        />
+      </FormControl>
+    </>
+  );
+};
+
+export default function CreateProposal() {
+  const toast = useToast();
+  const [step, setStep] = useState(2);
+  const [progress, setProgress] = useState(50);
+  const [title, setTitle] = useState('');
+  const [desc, setDesc] = useState('');
+  const [title2, setTitle2] = useState('');
+  const [benefit, setBenefit] = useState('');
+  const [benefit2, setBenefit2] = useState('');
+  const [target, setTarget] = useState('');
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const [cid, setCid] = useState('');
+  const [metaCid, setMetaCid] = useState('');
+  const [proposalLoading, setProposalLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
+
+
+  
+
+  async function onUploadClick() {
+    try {
+      setUploadLoading(true);
+      const cid = await storage(selectedImageFile, 'file.pdf');
+      console.log(cid);
+      const metadata = {
+        proposalTitle: title,
+        description: desc,
+        NftTitle: title2,
+        benefit: benefit,
+        benefit2: benefit2,
+        cid: cid,
+      };
+      console.log(metadata);
+      setCid(cid);
+      const mCid = await storage(
+        new Blob(JSON.stringify(metadata)),
+        'metadata.json'
+      );
+      setMetaCid(mCid);
+      setUploadLoading(false);
+    } catch (error) {
+      setUploadLoading(false);
+      toast({
+        title: 'Oops an error occured.',
+        description: 'we ran into an error :(',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  }
+
+  return (
+    <>
+      <Box
+        borderWidth="1px"
+        rounded="lg"
+        shadow="1px 1px 3px rgba(0,0,0,0.3)"
+        maxWidth={800}
+        p={6}
+        m="10px auto"
+        as="form"
+      >
+        {/* <Progress
+          hasStripe
+          value={progress}
+          mb="5%"
+          mx="5%"
+          isAnimated
+        ></Progress> */}
+        {/* {step === 1 ? (
+          <Form1
+            title={title}
+            setTitle={setTitle}
+            desc={desc}
+            setDesc={setDesc}
+            target={target}
+            setTarget={setTarget}
+          />
+        ) : ( */}
+        {
+          <Form2
+            title2={title2}
+            setTitle2={setTitle2}
+            benefit={benefit}
+            benefit2={benefit2}
+            setBenefit={setBenefit}
+            setBenefit2={setBenefit2}
+          />
+        }
+        <ButtonGroup mt="5%" w="100%">
+          <Flex w="100%" justifyContent="space-between">
+            <Button
+              w="7rem"
+              isDisabled={step === 2}
+              onClick={() => {
+                document.querySelector('.input_pdf').click();
+              }}
+              isLoading={uploadLoading}
+              disabled={uploadLoading}
+              colorScheme="blue"
+              variant="outline"
+            >
+              Upload
+            </Button>
+            <input
+              className="input_pdf"
+              accept="application/pdf"
+              type="file"
+              hidden
+              onChange={e => {
+                setSelectedImageFile(e.target.files[0]);
+              }}
+            />
+            <Flex>
+              {/* <Button
+                onClick={() => {
+                  setStep(step - 1);
+                  setProgress(progress - 50);
+                }}
+                isDisabled={step === 1}
+                colorScheme="blue"
+                variant="solid"
+                w="7rem"
+                mr="5%"
+              >
+                Back
+              </Button> */}
+              {/* <Button
+                w="7rem"
+                isDisabled={step === 2}
+                onClick={() => {
+                  setStep(step + 1);
+                  if (step === 2) {
+                    setProgress(100);
+                  } else {
+                    setProgress(progress + 50);
+                  }
+                }}
+                colorScheme="blue"
+                variant="outline"
+              >
+                Next
+              </Button> */}
+            </Flex>
+            {step === 2 ? (
+              <Button
+                w="7rem"
+                colorScheme="blue"
+                variant="solid"
+                isLoading={proposalLoading}
+                disabled={proposalLoading}
+                onClick={async () => {
+                  try {
+                    await onUploadClick();
+                  } catch (error) {
+                    console.log(
+                      '⚡️ ~ file: CreateProposal.jsx:418 ~ onClick={ ~ error',
+                      error
+                    );
+                    toast({
+                      title: 'Oops an error occured.',
+                      description: 'we ran into an error :(',
+                      status: 'error',
+                      duration: 2000,
+                      isClosable: true,
+                    });
+                  }
+                }}
+              >
+                Submit
+              </Button>
+            ) : null}
+          </Flex>
+        </ButtonGroup>
+      </Box>
+    </>
+  );
+}
